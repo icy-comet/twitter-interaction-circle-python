@@ -15,16 +15,17 @@ APP_SECRET = os.environ['API_SECRET_KEY']
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
 
-# setup connection
+# API connection
 auth = tweepy.OAuthHandler(APP_KEY, APP_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
-# urllib setup (prevention)
+# urllib setup (precaution)
 opener=urllib.request.build_opener()
 opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
 urllib.request.install_opener(opener)
 
+user_scores = {}
 
 def get_timeline(screen_name):
     res = []
@@ -42,34 +43,38 @@ def get_liked(screen_name):
     print('Fetched all likes')
     return res
 
-def select_users(screen_name):
+def add_record(screen_name, type):
+    if screen_name in user_scores.keys():
+        user_scores[screen_name][type] +=1
+    else:
+        user_scores.update({screen_name: {
+            'likes': 0,
+            'retweets': 0,
+            'replies': 0
+        }})
+
+def get_user_scores(screen_name):
     timeline = get_timeline(screen_name)
     likes = get_liked(screen_name)
 
-    user_scores = {}
-
     for tweet in timeline:
         if tweet.in_reply_to_screen_name and tweet.in_reply_to_screen_name != screen_name:
-            if tweet.in_reply_to_screen_name in user_scores.keys():
-                user_scores[tweet.in_reply_to_screen_name] +=4
-            else:
-                user_scores.update({tweet.in_reply_to_screen_name : 4})
+            add_record(tweet.in_reply_to_screen_name, 'replies')
         if hasattr(tweet, 'retweeted_status') and tweet.retweeted_status.user.screen_name != screen_name:
-            if tweet.retweeted_status.user.screen_name in user_scores.keys():
-                user_scores[tweet.retweeted_status.user.screen_name] +=6
-            else:
-                user_scores.update({tweet.retweeted_status.user.screen_name : 6})
+            add_record(tweet.retweeted_status.user.screen_name, 'retweets')
     print('calculated replies and retweets')
 
-    for each_like in likes:
-        if each_like.user.screen_name != screen_name:
-            if each_like.user.screen_name in user_scores.keys():
-                user_scores[each_like.user.screen_name] += 2
-            else:
-                user_scores.update({each_like.user.screen_name : 2})
+    for like in likes:
+        if like.user.screen_name != screen_name:
+            add_record(like.user.screen_name, 'likes')
     print('calculated likes')
 
-    sorted_dict = dict(sorted(user_scores.items(), key=lambda x:x[1]))
+def select_users():
+    tmp_dict = {}
+    for user in user_scores:
+        total = user_scores[user]['likes']*1 + user_scores[user]['replies']*1.1 + user_scores[user]['replies']*1.3
+        tmp_dict.update({user: total})
+    sorted_dict = dict(sorted(tmp_dict.items(), key=lambda x:x[1]))
     pairs = list(sorted_dict.items())
     selected_users = []
     for i in range(len(pairs)-1, len(pairs)-50, -1):
@@ -155,7 +160,8 @@ def create_image(selected_users):
     bg.save(f'{screen_name}.jpg')
     print('image created and saved')
 
-selected_users = select_users(screen_name)
+get_user_scores(screen_name)
+selected_users = select_users()
 avatars = get_avatars(selected_users)
 selected_users = add_avatars(selected_users, avatars)
 create_image(selected_users)
