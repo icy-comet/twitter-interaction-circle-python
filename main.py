@@ -121,6 +121,7 @@ def create_image(selected_users):
     bg = create_bg()
     print('created background')
     gap = 10
+    #first is the no. of images, 2nd is the circle radius, 3rd is the starting index and 4th is the last index
     layers= [(8, 150, 0, 8), (15, 270, 8, 23), (26, 380, 23, 60)]
     file = get_center_avatar()
     bg_w, bg_h = bg.size
@@ -145,8 +146,8 @@ def create_image(selected_users):
                 avatar = avatar.resize((h, w))
                 angle_x = math.cos(math.radians(base_angle*no_of_image))
                 angle_y = math.sin(math.radians(base_angle*no_of_image))
-                x = math.ceil(R * angle_x + 445) + (layers.index(layer)*8)
-                y = math.ceil(R * angle_y + 445) + (layers.index(layer)*8)
+                x = math.ceil(R * angle_x + 445) + (layers.index(layer)*8) #offset to address circles misalignment
+                y = math.ceil(R * angle_y + 445) + (layers.index(layer)*8) #offset to address circles misalignment
                 bg.paste(avatar, (x, y), create_mask(avatar))
                 no_of_image += 1
             else:
