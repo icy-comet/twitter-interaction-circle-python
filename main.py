@@ -29,7 +29,7 @@ user_scores = {}
 
 def get_timeline(screen_name):
     res = []
-    for page in tweepy.Cursor(api.user_timeline, screen_name=screen_name, count=200).pages(14):
+    for page in tweepy.Cursor(api.user_timeline, screen_name=screen_name, count=200).pages(6): #fetches 1200 tweets
         for tweet in page:
             res.append(tweet)
     print('Fetched the entire timeline')
@@ -37,7 +37,7 @@ def get_timeline(screen_name):
 
 def get_liked(screen_name):
     res = []
-    for page in tweepy.Cursor(api.favorites, screen_name=screen_name, count=200).pages(14):
+    for page in tweepy.Cursor(api.favorites, screen_name=screen_name, count=200).pages(6):
         for each_like in page:
             res.append(each_like)
     print('Fetched all likes')
@@ -79,7 +79,7 @@ def select_users():
     selected_users = []
     for i in range(len(pairs)-1, len(pairs)-50, -1):
         selected_users.append(pairs[i])
-    print('sorted dict according to the score')
+    print('sorted dict according to the total')
     return dict(selected_users)
 
 def get_avatars(selected_users):
