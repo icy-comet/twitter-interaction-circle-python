@@ -25,8 +25,6 @@ opener=urllib.request.build_opener()
 opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
 urllib.request.install_opener(opener)
 
-user_scores = {}
-
 def get_timeline(screen_name):
     res = []
     for page in tweepy.Cursor(api.user_timeline, screen_name=screen_name, count=200).pages(6): #fetches 1200 tweets
@@ -43,33 +41,36 @@ def get_liked(screen_name):
     print('Fetched all likes')
     return res
 
-def add_record(screen_name, type):
+def add_record(user_scores, screen_name, type):
     if screen_name in user_scores.keys():
         user_scores[screen_name][type] +=1
+        return user_scores
     else:
         user_scores.update({screen_name: {
             'likes': 0,
             'retweets': 0,
             'replies': 0
         }})
+        return user_scores
 
 def get_user_scores(screen_name):
     timeline = get_timeline(screen_name)
     likes = get_liked(screen_name)
-
+    user_scores = {}
     for tweet in timeline:
         if tweet.in_reply_to_screen_name and tweet.in_reply_to_screen_name != screen_name:
-            add_record(tweet.in_reply_to_screen_name, 'replies')
+            user_scores = add_record(user_scores, tweet.in_reply_to_screen_name, 'replies')
         if hasattr(tweet, 'retweeted_status') and tweet.retweeted_status.user.screen_name != screen_name:
-            add_record(tweet.retweeted_status.user.screen_name, 'retweets')
+            user_scores = add_record(user_scores, tweet.retweeted_status.user.screen_name, 'retweets')
     print('calculated replies and retweets')
 
     for like in likes:
         if like.user.screen_name != screen_name:
-            add_record(like.user.screen_name, 'likes')
+            user_scores = add_record(user_scores, like.user.screen_name, 'likes')
     print('calculated likes')
+    return user_scores
 
-def select_users():
+def select_users(user_scores):
     tmp_dict = {}
     for user in user_scores:
         total = user_scores[user]['likes']*1 + user_scores[user]['replies']*1.1 + user_scores[user]['replies']*1.3
@@ -94,7 +95,7 @@ def get_avatars(selected_users):
 def get_center_avatar():
     user = api.get_user(screen_name=screen_name)
     avatar_url = user.profile_image_url_https.replace('normal', '400x400')
-    file, _ = urllib.request.urlretrieve(avatar_url, 'center.jpg')
+    file, _ = urllib.request.urlretrieve(avatar_url)
     return file
 
 def add_avatars(selected_users, avatars):
@@ -130,7 +131,7 @@ def create_image(selected_users):
     layers= [(8, 150, 0, 8), (15, 270, 8, 23), (26, 380, 23, 60)]
     file = get_center_avatar()
     bg_w, bg_h = bg.size
-    center_avatar = Image.open(file)
+    center_avatar = Image.open(file).convert('RGB')
     center_avatar = center_avatar.resize((160, 160))
     bg.paste(center_avatar, ((bg_w - 160)//2, (bg_h - 160)//2), create_mask(center_avatar))
     print('pasted central avatar')
@@ -160,8 +161,8 @@ def create_image(selected_users):
     bg.save(f'{screen_name}.jpg')
     print('image created and saved')
 
-get_user_scores(screen_name)
-selected_users = select_users()
+user_scores = get_user_scores(screen_name)
+selected_users = select_users(user_scores)
 avatars = get_avatars(selected_users)
 selected_users = add_avatars(selected_users, avatars)
 create_image(selected_users)
