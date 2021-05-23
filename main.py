@@ -25,6 +25,20 @@ opener=urllib.request.build_opener()
 opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
 urllib.request.install_opener(opener)
 
+def verify_user(screen_name):
+    try:
+        user = api.get_user(screen_name=screen_name)
+        return user
+    except tweepy.TweepError as e:
+        if e.args[0][0]['code'] == 50:
+            print('User Not Found')
+            return None
+
+def get_user_avatar(user):
+        avatar_url = user.profile_image_url_https.replace('normal', '400x400')
+        file, _ = urllib.request.urlretrieve(avatar_url)
+        return file
+
 def get_timeline(screen_name):
     res = []
     for page in tweepy.Cursor(api.user_timeline, screen_name=screen_name, count=200).pages(6): #fetches 1200 tweets
@@ -53,7 +67,7 @@ def add_record(user_scores, screen_name, type):
         }})
         return user_scores
 
-def get_user_scores(screen_name):
+def get_scores(screen_name):
     timeline = get_timeline(screen_name)
     likes = get_liked(screen_name)
     user_scores = {}
@@ -83,22 +97,16 @@ def select_users(user_scores):
     print('sorted dict according to the total')
     return dict(selected_users)
 
-def get_avatars(selected_users):
+def get_selected_avatars(selected_users):
     users_list = [user for user in selected_users.keys()]
     res = api.lookup_users(screen_names=users_list, include_entities=False)
     avatars = {}
     for user in res:
-        avatars.update({user.screen_name : user.profile_image_url_https.replace('normal', '400x400')})
+        avatars.update({user.screen_name : user.profile_image_url_https.replace('_normal', '_400x400')})
     print('fetched all avatar urls')
     return avatars
 
-def get_center_avatar():
-    user = api.get_user(screen_name=screen_name)
-    avatar_url = user.profile_image_url_https.replace('normal', '400x400')
-    file, _ = urllib.request.urlretrieve(avatar_url)
-    return file
-
-def add_avatars(selected_users, avatars):
+def combine_avatars(selected_users, avatars):
     for user in selected_users:
         selected_users[user] = {
             'score' : selected_users[user],
@@ -123,28 +131,28 @@ def create_mask(image):
     npImage=np.dstack((npImage, npAlpha))
     return Image.fromarray(npImage)
 
-def create_image(selected_users):
+def create_image(center_avatar, selected_users):
     bg = create_bg()
     print('created background')
     gap = 10
-    #first is the no. of images, 2nd is the circle radius, 3rd is the starting index and 4th is the last index
-    layers= [(8, 150, 0, 8), (15, 270, 8, 23), (26, 380, 23, 60)]
-    file = get_center_avatar()
+    layers=[{'image_count': 8, 'radius': 150, 'starting_index': 0, 'ending_index': 8},
+            {'image_count': 15, 'radius': 270, 'starting_index': 8, 'ending_index': 23},
+            {'image_count': 26, 'radius': 380, 'starting_index': 23, 'ending_index': 60}]
     bg_w, bg_h = bg.size
-    center_avatar = Image.open(file).convert('RGB')
+    center_avatar = Image.open(center_avatar).convert('RGB')
     center_avatar = center_avatar.resize((160, 160))
     bg.paste(center_avatar, ((bg_w - 160)//2, (bg_h - 160)//2), create_mask(center_avatar))
     print('pasted central avatar')
     for layer in layers:
-        image_count = layer[0]
+        image_count = layer['image_count']
         gaps_count = image_count-1
-        R = layer[1]
+        R = layer['radius']
         circuit = 2*math.pi*R
         diagonal = int((circuit - gaps_count*gap) / image_count)
         no_of_image = 0
-        base_angle = 360/layer[0]
+        base_angle = 360/layer['image_count']
         for user in selected_users:
-            if list(selected_users.keys()).index(user) >= layer[2] and list(selected_users.keys()).index(user) < layer[3]:
+            if list(selected_users.keys()).index(user) >= layer['starting_index'] and list(selected_users.keys()).index(user) < layer['ending_index']:
                 file, _ = urllib.request.urlretrieve(selected_users[user]['avatar'])
                 avatar = Image.open(file).convert('RGB')
                 h = diagonal
@@ -161,8 +169,17 @@ def create_image(selected_users):
     bg.save(f'{screen_name}.jpg')
     print('image created and saved')
 
-user_scores = get_user_scores(screen_name)
-selected_users = select_users(user_scores)
-avatars = get_avatars(selected_users)
-selected_users = add_avatars(selected_users, avatars)
-create_image(selected_users)
+
+def start_magic(screen_name):
+    user = verify_user(screen_name)
+    if user != None:
+        center_avatar = get_user_avatar(user)
+        scores = get_scores(screen_name)
+        selected_users = select_users(scores)
+        selected_avatars = get_selected_avatars(selected_users)
+        selected_users = combine_avatars(selected_users, selected_avatars)
+        create_image(center_avatar=center_avatar, selected_users=selected_users)
+    else:
+        print('quitting...')
+
+start_magic(screen_name)
