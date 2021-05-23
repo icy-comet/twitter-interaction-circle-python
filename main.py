@@ -1,5 +1,5 @@
 # all imports
-import os, math, urllib.request
+import os, math, urllib.request, json
 import tweepy
 from dotenv import load_dotenv
 from PIL import Image, ImageDraw
@@ -18,7 +18,7 @@ ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
 # API connection
 auth = tweepy.OAuthHandler(APP_KEY, APP_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-api = tweepy.API(auth)
+api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 # urllib setup (precaution)
 opener=urllib.request.build_opener()
@@ -133,6 +133,7 @@ def create_mask(image):
 
 def create_image(center_avatar, selected_users):
     bg = create_bg()
+    users_in_circle={}
     print('created background')
     gap = 10
     layers=[{'image_count': 8, 'radius': 150, 'starting_index': 0, 'ending_index': 8},
@@ -151,8 +152,10 @@ def create_image(center_avatar, selected_users):
         diagonal = int((circuit - gaps_count*gap) / image_count)
         no_of_image = 0
         base_angle = 360/layer['image_count']
+        users_list = []
         for user in selected_users:
             if list(selected_users.keys()).index(user) >= layer['starting_index'] and list(selected_users.keys()).index(user) < layer['ending_index']:
+                users_list.append(user)
                 file, _ = urllib.request.urlretrieve(selected_users[user]['avatar'])
                 avatar = Image.open(file).convert('RGB')
                 h = diagonal
@@ -166,11 +169,14 @@ def create_image(center_avatar, selected_users):
                 no_of_image += 1
             else:
                 pass
+        users_in_circle.update({f'circle-{layers.index(layer)}': users_list})
     bg.save(f'{screen_name}.jpg')
     print('image created and saved')
+    with open('circles.json', 'w') as f:
+        json.dump(users_in_circle, f)
+    print('saved the circles, too ;)')
 
-
-def start_magic(screen_name):
+def start(screen_name):
     user = verify_user(screen_name)
     if user != None:
         center_avatar = get_user_avatar(user)
@@ -182,4 +188,4 @@ def start_magic(screen_name):
     else:
         print('quitting...')
 
-start_magic(screen_name)
+start(screen_name)
