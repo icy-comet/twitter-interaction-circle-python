@@ -3,7 +3,6 @@ import os, math, urllib.request, json
 import tweepy
 from dotenv import load_dotenv
 from PIL import Image, ImageDraw
-import numpy as np
 
 # username to create interaction circle for
 screen_name = 'AniketTeredesai'
@@ -126,10 +125,7 @@ def create_mask(image):
     alpha = Image.new('L', image.size, 0)
     draw = ImageDraw.Draw(alpha)
     draw.pieslice([(0, 0), image.size], 0, 360, fill=255)
-    npAlpha=np.array(alpha)
-    npImage=np.array(image)
-    npImage=np.dstack((npImage, npAlpha))
-    return Image.fromarray(npImage)
+    return alpha
 
 def create_image(center_avatar, selected_users):
     bg = create_bg()
