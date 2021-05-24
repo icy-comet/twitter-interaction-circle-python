@@ -32,6 +32,9 @@ def verify_user(screen_name):
         if e.args[0][0]['code'] == 50:
             print('User Not Found')
             return None
+    except:
+        print("couldn't connect to the api and verify the screen_name")
+        return None
 
 def get_user_avatar(user):
         avatar_url = user.profile_image_url_https.replace('normal', '400x400')
