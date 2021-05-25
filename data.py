@@ -28,17 +28,17 @@ def verify_user(screen_name):
         print("couldn't connect to the api and verify the screen_name")
         return None
 
-def get_timeline(screen_name):
+def get_timeline(screen_name, pages):
     res = []
-    for page in tweepy.Cursor(api.user_timeline, screen_name=screen_name, count=200).pages(3): #fetches 600 tweets
+    for page in tweepy.Cursor(api.user_timeline, screen_name=screen_name, count=200).pages(pages):
         for tweet in page:
             res.append(tweet)
-    print('fetched recent 600 tweets')
+    print('fetched tweets')
     return res
 
-def get_liked(screen_name):
+def get_liked(screen_name, pages):
     res = []
-    for page in tweepy.Cursor(api.favorites, screen_name=screen_name, count=200).pages(3):
+    for page in tweepy.Cursor(api.favorites, screen_name=screen_name, count=200).pages(pages):
         for each_like in page:
             res.append(each_like)
     print('fetched likes')
@@ -56,9 +56,9 @@ def add_record(user_scores, screen_name, type):
         }})
         return user_scores
 
-def get_scores(screen_name):
-    timeline = get_timeline(screen_name)
-    likes = get_liked(screen_name)
+def get_scores(screen_name, pages):
+    timeline = get_timeline(screen_name, pages)
+    likes = get_liked(screen_name, pages)
     user_scores = {}
     for tweet in timeline:
         if tweet.in_reply_to_screen_name and tweet.in_reply_to_screen_name != screen_name:
@@ -104,11 +104,8 @@ def combine_avatars(selected_users, avatars):
     print('seleted usrs updated with avatar urls')
     return selected_users
 
-def define_layers(selected_users):
+def define_layers(selected_users, layers_config):
     selected_users_list = list(selected_users.keys())
-    layers_config= [{'image_count': 8, 'radius': 150, 'starting_index': 0, 'ending_index': 8},
-                    {'image_count': 15, 'radius': 270, 'starting_index': 8, 'ending_index': 23},
-                    {'image_count': 26, 'radius': 380, 'starting_index': 23, 'ending_index': 60}]
     res_json = {}
     for config in layers_config:
         starting_index = config['starting_index']
@@ -127,15 +124,15 @@ def define_layers(selected_users):
     print('saved json')
     return layers_config
 
-def get_data(screen_name):
+def get_data(screen_name, pages, layers_config):
     user = verify_user(screen_name)
     if user != None:
         avatar_url = user.profile_image_url_https.replace('normal', '400x400')
-        scores = get_scores(screen_name)
+        scores = get_scores(screen_name, pages)
         selected_users = select_users(scores)
         selected_avatars = get_avatar_urls(selected_users)
         selected_users = combine_avatars(selected_users, selected_avatars)
-        layers_config = define_layers(selected_users)
+        layers_config = define_layers(selected_users, layers_config)
         return [avatar_url, layers_config]
     else:
         return None

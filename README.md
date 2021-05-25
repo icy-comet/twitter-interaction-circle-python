@@ -31,10 +31,10 @@ ACCESS_TOKEN=CCCCC
 ACCESS_TOKEN_SECRET=CCCCC
 ```
 
-### Limiting Analyzed Data
-The script, by default, fetches your recent 600 tweets from the timeline. However, you can set it to fetch upto 3000 as limited by the API. Just change the number of pages in `get_timeline` and `get_liked` functions.
+### Customization
+All the customizable variables can be changed inside `main.py` which serves as the calling point.
 
-Note: Each page consists of 200 tweets.
+Note: The script, by default, fetches recent 600 tweets from the timeline to analyze. However, you can set it to fetch upto 3000 as limited by the API. Each page consists of 200 tweets.
 
 ### Run
 Running would be as simple as `python main.py`.

@@ -7,13 +7,12 @@ opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKi
 urllib.request.install_opener(opener)
 
 def get_user_avatar(avatar_url):
-        file, _ = urllib.request.urlretrieve(avatar_url)
-        return file
+    file, _ = urllib.request.urlretrieve(avatar_url)
+    return file
 
-def create_bg():
+def create_bg(color):
     mode = 'RGB'
     size = (1000, 1000)
-    color = '#2978b5'
     bg = Image.new(mode, size, color)
     print('created background')
     return bg
@@ -24,14 +23,15 @@ def create_mask(image):
     draw.pieslice([(0, 0), image.size], 0, 360, fill=255)
     return alpha
 
-def create_image(center_avatar_url, layers_config):
-    bg = create_bg()
+def create_image(center_avatar_url, color, layers_config):
+    bg = create_bg(color)
     gap = 10
     bg_w, bg_h = bg.size
     center_avatar = Image.open(get_user_avatar(center_avatar_url)).convert('RGB')
     center_avatar = center_avatar.resize((160, 160))
     bg.paste(center_avatar, ((bg_w - 160)//2, (bg_h - 160)//2), create_mask(center_avatar))
     print('pasted central avatar')
+    print('creating circles. might take time...')
     for layer in layers_config:
         image_count = layer['image_count']
         users = layer['users']
