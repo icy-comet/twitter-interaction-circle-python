@@ -5,7 +5,7 @@ This is kind of a python recreation of the popular [Node based project](https://
 
 ## Example Image
 
-![Example](circle.jpg)
+![Example](example.jpg)
 
 ## Setup
 ### Install Requirements
