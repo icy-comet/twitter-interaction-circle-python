@@ -32,7 +32,7 @@ ACCESS_TOKEN_SECRET=CCCCC
 ```
 
 ### Limiting Analyzed Data
-By default, the script fetches 1200 tweets from your timeline. To change it, change the number of pages to fetch in `get_timeline` and `get_liked` functions.
+The script, by default, fetches your recent 600 tweets from the timeline. However, you can set it to fetch upto 3000 as limited by the API. Just change the number of pages in `get_timeline` and `get_liked` functions.
 
 Note: Each page consists of 200 tweets.
 

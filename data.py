@@ -1,5 +1,5 @@
 # all imports
-import os
+import os, json
 import tweepy
 from dotenv import load_dotenv
 
@@ -18,6 +18,7 @@ api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 def verify_user(screen_name):
     try:
         user = api.get_user(screen_name=screen_name)
+        print('verified user')
         return user
     except tweepy.TweepError as e:
         if e.args[0][0]['code'] == 50:
@@ -29,18 +30,18 @@ def verify_user(screen_name):
 
 def get_timeline(screen_name):
     res = []
-    for page in tweepy.Cursor(api.user_timeline, screen_name=screen_name, count=200).pages(6): #fetches 1200 tweets
+    for page in tweepy.Cursor(api.user_timeline, screen_name=screen_name, count=200).pages(3): #fetches 600 tweets
         for tweet in page:
             res.append(tweet)
-    print('Fetched the entire timeline')
+    print('fetched recent 600 tweets')
     return res
 
 def get_liked(screen_name):
     res = []
-    for page in tweepy.Cursor(api.favorites, screen_name=screen_name, count=200).pages(6):
+    for page in tweepy.Cursor(api.favorites, screen_name=screen_name, count=200).pages(3):
         for each_like in page:
             res.append(each_like)
-    print('Fetched all likes')
+    print('fetched likes')
     return res
 
 def add_record(user_scores, screen_name, type):
@@ -82,10 +83,10 @@ def select_users(user_scores):
     selected_users = []
     for i in range(len(pairs)-1, len(pairs)-50, -1):
         selected_users.append(pairs[i])
-    print('sorted dict according to the total')
+    print('sorted users')
     return dict(selected_users)
 
-def get_selected_avatars(selected_users):
+def get_avatar_urls(selected_users):
     users_list = [user for user in selected_users.keys()]
     res = api.lookup_users(screen_names=users_list, include_entities=False)
     avatars = {}
@@ -100,8 +101,31 @@ def combine_avatars(selected_users, avatars):
             'score' : selected_users[user],
             'avatar' : avatars[user]
         }
-    print('avatar urls added to the selected users dictionary')
+    print('seleted usrs updated with avatar urls')
     return selected_users
+
+def define_layers(selected_users):
+    selected_users_list = list(selected_users.keys())
+    layers_config= [{'image_count': 8, 'radius': 150, 'starting_index': 0, 'ending_index': 8},
+                    {'image_count': 15, 'radius': 270, 'starting_index': 8, 'ending_index': 23},
+                    {'image_count': 26, 'radius': 380, 'starting_index': 23, 'ending_index': 60}]
+    res_json = {}
+    for config in layers_config:
+        starting_index = config['starting_index']
+        ending_index = config['ending_index']
+        config.pop('starting_index')
+        config.pop('ending_index')
+        users = {}
+        for user in selected_users:
+            if selected_users_list.index(user) >= starting_index and selected_users_list.index(user) < ending_index:
+                users.update({user: selected_users[user]})
+        config.update({'users': users})
+        res_json.update({f'circle{layers_config.index(config)}': [username for username in users]}) #list comprehension
+    with open('circles.json', 'w') as f:
+        json.dump(res_json, f)
+    print('defined layers')
+    print('saved json')
+    return layers_config
 
 def get_data(screen_name):
     user = verify_user(screen_name)
@@ -109,8 +133,9 @@ def get_data(screen_name):
         avatar_url = user.profile_image_url_https.replace('normal', '400x400')
         scores = get_scores(screen_name)
         selected_users = select_users(scores)
-        selected_avatars = get_selected_avatars(selected_users)
+        selected_avatars = get_avatar_urls(selected_users)
         selected_users = combine_avatars(selected_users, selected_avatars)
-        return [avatar_url, selected_users]
+        layers_config = define_layers(selected_users)
+        return [avatar_url, layers_config]
     else:
         return None
