@@ -33,15 +33,15 @@ def create_image(center_avatar_url, color, layers_config):
     print('pasted central avatar')
     print('creating circles. might take time...')
     for layer in layers_config:
-        image_count = layer['image_count']
         users = layer['users']
+        image_count = len(users)
         gaps_count = image_count-1
         R = layer['radius']
         circuit = 2*math.pi*R
         diagonal = int((circuit - gaps_count*gap) / image_count)
         no_of_image = 0
         base_angle = 360/image_count
-        for user in layer['users']:
+        for user in users:
             file, _ = urllib.request.urlretrieve(users[user]['avatar'])
             avatar = Image.open(file).convert('RGB')
             h = diagonal
@@ -53,5 +53,5 @@ def create_image(center_avatar_url, color, layers_config):
             y = math.ceil(R * angle_y + 445) + (layers_config.index(layer)*8) #offset to address circles misalignment
             bg.paste(avatar, (x, y), create_mask(avatar))
             no_of_image += 1
-    bg.save('interaction_circle.jpg')
-    print('image created and saved')
+    print('created the image')
+    return bg

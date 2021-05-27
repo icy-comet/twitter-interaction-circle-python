@@ -1,5 +1,6 @@
 # all imports
-import os, json
+import os
+import exceptions
 import tweepy
 from dotenv import load_dotenv
 
@@ -22,11 +23,10 @@ def verify_user(screen_name):
         return user
     except tweepy.TweepError as e:
         if e.args[0][0]['code'] == 50:
-            print('User Not Found')
-            return None
+            raise(exceptions.InvalidUser(screen_name))
     except:
         print("couldn't connect to the api and verify the screen_name")
-        return None
+        raise(exceptions.ApiError)
 
 def get_timeline(screen_name, pages):
     res = []
@@ -82,7 +82,10 @@ def select_users(user_scores):
     pairs = list(sorted_dict.items())
     selected_users = []
     for i in range(len(pairs)-1, len(pairs)-50, -1):
-        selected_users.append(pairs[i])
+        try:
+            selected_users.append(pairs[i])
+        except:
+            raise(exceptions.InactiveUser)
     print('sorted users')
     return dict(selected_users)
 
@@ -106,7 +109,7 @@ def combine_avatars(selected_users, avatars):
 
 def define_layers(selected_users, layers_config):
     selected_users_list = list(selected_users.keys())
-    res_json = {}
+    users_in_circles = {}
     for config in layers_config:
         starting_index = config['starting_index']
         ending_index = config['ending_index']
@@ -116,23 +119,28 @@ def define_layers(selected_users, layers_config):
         for user in selected_users:
             if selected_users_list.index(user) >= starting_index and selected_users_list.index(user) < ending_index:
                 users.update({user: selected_users[user]})
+            else:
+                pass
         config.update({'users': users})
-        res_json.update({f'circle{layers_config.index(config)}': [username for username in users]}) #list comprehension
-    with open('circles.json', 'w') as f:
-        json.dump(res_json, f)
+        users_in_circles.update({f'circle{layers_config.index(config)}': [username for username in users]}) #list comprehension
     print('defined layers')
-    print('saved json')
-    return layers_config
+    print('created users dict')
+    return [layers_config, users_in_circles]
 
 def get_data(screen_name, pages, layers_config):
-    user = verify_user(screen_name)
-    if user != None:
+    try:
+        user = verify_user(screen_name)
         avatar_url = user.profile_image_url_https.replace('normal', '400x400')
         scores = get_scores(screen_name, pages)
-        selected_users = select_users(scores)
-        selected_avatars = get_avatar_urls(selected_users)
-        selected_users = combine_avatars(selected_users, selected_avatars)
-        layers_config = define_layers(selected_users, layers_config)
-        return [avatar_url, layers_config]
-    else:
+        try:
+            selected_users = select_users(scores)
+            selected_avatars = get_avatar_urls(selected_users)
+            selected_users = combine_avatars(selected_users, selected_avatars)
+            layers_config, users_in_circles = define_layers(selected_users, layers_config)
+            return [avatar_url, layers_config, users_in_circles]
+        except exceptions.InactiveUser as e:
+            print(e)
+            return None
+    except (exceptions.InvalidUser, exceptions.ApiError) as e:
+        print(e)
         return None

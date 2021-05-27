@@ -1,7 +1,7 @@
 ## Introduction
 The script analyzes your recent public activity on Twitter and creates a beautiful image with the avatars of people you most interact with.
 
-This is kind of a python recreation of the popular [Node based project](https://github.com/duiker101/twitter-interaction-circles) behind [Chirpty](https://chirpty.com).
+This is kind of a Python recreation of the popular [Node based project](https://github.com/duiker101/twitter-interaction-circles) that powers [Chirpty](https://chirpty.com).
 
 ## Example Image
 
@@ -34,7 +34,9 @@ ACCESS_TOKEN_SECRET=CCCCC
 ### Customization
 All the customizable variables can be changed inside `main.py` which serves as the calling point.
 
-Note: The script, by default, fetches recent 600 tweets from the timeline to analyze. However, you can set it to fetch upto 3000 as limited by the API. Each page consists of 200 tweets.
+The script can also return a JSON list of users in each circle and/or return a base64 encoded image instead of saving it as JPEG. Configure it in `main.py`.
+
+Note: The script, by default, fetches 3 pages of data from the Twitter API. Each page consists of 200 tweets and 20 likes. You can set it to fetch upto 3000 tweets as limited by the API.
 
 ### Run
 Running would be as simple as `python main.py`.
