@@ -18,10 +18,12 @@ def create_bg(color):
     return bg
 
 def create_mask(image):
-    alpha = Image.new('L', image.size, 0)
+    h, w = image.size
+    mask_size = (h*3, w*3)
+    alpha = Image.new('L', mask_size, 0)
     draw = ImageDraw.Draw(alpha)
-    draw.pieslice([(0, 0), image.size], 0, 360, fill=255)
-    return alpha
+    draw.pieslice([(0, 0), mask_size], 0, 360, fill=255)
+    return alpha.resize(image.size, Image.LANCZOS)
 
 def create_image(center_avatar_url, color, layers_config):
     bg = create_bg(color)
