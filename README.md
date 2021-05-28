@@ -27,8 +27,6 @@ If using on a local machine, place the keys inside a `.env` file in the project'
 ```
 API_KEY=AAAAAA
 API_SECRET_KEY=BBBB
-ACCESS_TOKEN=CCCCC
-ACCESS_TOKEN_SECRET=CCCCC
 ```
 
 ### Customization

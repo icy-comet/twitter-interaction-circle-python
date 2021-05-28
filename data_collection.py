@@ -12,8 +12,7 @@ ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
 
 # API connection
-auth = tweepy.OAuthHandler(APP_KEY, APP_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+auth = tweepy.AppAuthHandler(APP_KEY, APP_SECRET)
 api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 def verify_user(screen_name):
