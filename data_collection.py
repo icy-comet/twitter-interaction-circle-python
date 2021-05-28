@@ -79,7 +79,7 @@ def select_users(user_scores):
     sorted_dict = dict(sorted(tmp_dict.items(), key=lambda x:x[1]))
     pairs = list(sorted_dict.items())
     selected_users = []
-    for i in range(len(pairs)-1, len(pairs)-50, -1):
+    for i in range(len(pairs)-1, len(pairs)-56, -1):
         try:
             selected_users.append(pairs[i])
         except:
@@ -97,11 +97,18 @@ def get_avatar_urls(selected_users):
     return avatars
 
 def combine_avatars(selected_users, avatars):
+    temp_dict = {}
     for user in selected_users:
-        selected_users[user] = {
-            'score' : selected_users[user],
-            'avatar' : avatars[user]
-        }
+        try: # remove invalid users such as deleted accounts
+            temp_dict[user] = {
+                'score' : selected_users[user],
+                'avatar' : avatars[user]
+            }
+        except:
+            pass
+    selected_users = temp_dict
+    while len(selected_users) > 49:
+        selected_users.popitem()
     print('seleted usrs updated with avatar urls')
     return selected_users
 

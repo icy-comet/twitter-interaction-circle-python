@@ -26,4 +26,6 @@ def start(screen_name, pages, color, layers_config):
     except (exceptions.InactiveUser, exceptions.InvalidUser, exceptions.ApiError) as e:
         print(e)
 
-start(screen_name, pages_to_fetch, background_color, layers_config)
+
+if __name__ == '__main__':
+    start(screen_name, pages_to_fetch, background_color, layers_config)

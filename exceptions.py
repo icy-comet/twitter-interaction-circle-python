@@ -7,8 +7,8 @@ class InvalidUser(Exception):
 
 class InactiveUser(Exception):
     def __str__(self):
-        return f"Passed User does not have enough activity."
+        return f"You do not have enough activity on your Twitter profile."
 
 class ApiError(Exception):
     def __str__(self):
-        return "Something went wrong with Tweepy or the API."
+        return "Something went wrong with the API."
