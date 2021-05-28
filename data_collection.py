@@ -25,7 +25,6 @@ def verify_user(screen_name):
         if e.args[0][0]['code'] == 50:
             raise(exceptions.InvalidUser(screen_name))
     except:
-        print("couldn't connect to the api and verify the screen_name")
         raise(exceptions.ApiError)
 
 def get_timeline(screen_name, pages):
@@ -128,19 +127,11 @@ def define_layers(selected_users, layers_config):
     return [layers_config, users_in_circles]
 
 def get_data(screen_name, pages, layers_config):
-    try:
-        user = verify_user(screen_name)
-        avatar_url = user.profile_image_url_https.replace('normal', '400x400')
-        scores = get_scores(screen_name, pages)
-        try:
-            selected_users = select_users(scores)
-            selected_avatars = get_avatar_urls(selected_users)
-            selected_users = combine_avatars(selected_users, selected_avatars)
-            layers_config, users_in_circles = define_layers(selected_users, layers_config)
-            return [avatar_url, layers_config, users_in_circles]
-        except exceptions.InactiveUser as e:
-            print(e)
-            return None
-    except (exceptions.InvalidUser, exceptions.ApiError) as e:
-        print(e)
-        return None
+    user = verify_user(screen_name)
+    avatar_url = user.profile_image_url_https.replace('normal', '400x400')
+    scores = get_scores(screen_name, pages)
+    selected_users = select_users(scores)
+    selected_avatars = get_avatar_urls(selected_users)
+    selected_users = combine_avatars(selected_users, selected_avatars)
+    layers_config, users_in_circles = define_layers(selected_users, layers_config)
+    return [avatar_url, layers_config, users_in_circles]
