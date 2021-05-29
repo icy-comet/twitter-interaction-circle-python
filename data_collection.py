@@ -6,10 +6,8 @@ from dotenv import load_dotenv
 
 # load environment variables
 load_dotenv()
-APP_KEY = os.environ['API_KEY']
-APP_SECRET = os.environ['API_SECRET_KEY']
-ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
-ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
+APP_KEY = os.environ.get('API_KEY')
+APP_SECRET = os.environ.get('API_SECRET_KEY')
 
 # API connection
 auth = tweepy.AppAuthHandler(APP_KEY, APP_SECRET)
@@ -17,7 +15,7 @@ api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 def verify_user(screen_name):
     try:
-        user = api.get_user(screen_name=screen_name)
+        user = api.get_user(screen_name=screen_name, include_entities=False)
         print('verified user')
         return user
     except tweepy.TweepError as e:
@@ -74,7 +72,7 @@ def get_scores(screen_name, pages):
 def select_users(user_scores):
     tmp_dict = {}
     for user in user_scores:
-        total = user_scores[user]['likes']*1 + user_scores[user]['replies']*1.1 + user_scores[user]['replies']*1.3
+        total = (user_scores[user]['likes']*1) + (user_scores[user]['replies']*1.1) + (user_scores[user]['replies']*1.3)
         tmp_dict.update({user: total})
     sorted_dict = dict(sorted(tmp_dict.items(), key=lambda x:x[1]))
     pairs = list(sorted_dict.items())
@@ -109,7 +107,7 @@ def combine_avatars(selected_users, avatars):
     selected_users = temp_dict
     while len(selected_users) > 49:
         selected_users.popitem()
-    print('seleted usrs updated with avatar urls')
+    print('selected_users updated with avatar urls')
     return selected_users
 
 def define_layers(selected_users, layers_config):
@@ -135,6 +133,7 @@ def define_layers(selected_users, layers_config):
 def get_data(screen_name, pages, layers_config):
     user = verify_user(screen_name)
     avatar_url = user.profile_image_url_https.replace('normal', '400x400')
+    screen_name = user.screen_name # Twitter API doesn't consider usernames case-sensitive
     scores = get_scores(screen_name, pages)
     selected_users = select_users(scores)
     selected_avatars = get_avatar_urls(selected_users)
