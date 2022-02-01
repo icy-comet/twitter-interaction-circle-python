@@ -19,6 +19,8 @@ And then, simply run:
 pip install -r requirements.txt
 ```
 
+> For pinned/tested versions use requirements.pinned.txt.
+
 ### Loading API keys
 The script looks for the keys in environment variables.
 
