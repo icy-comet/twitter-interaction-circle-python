@@ -44,7 +44,7 @@ def create_image(center_avatar_url, color, layers_config):
         no_of_image = 0
         base_angle = 360/image_count
         for user in users:
-            file, _ = urllib.request.urlretrieve(users[user]['avatar'])
+            file = get_user_avatar(users[user]['avatar'])
             avatar = Image.open(file).convert('RGB')
             h = diagonal
             w = diagonal
