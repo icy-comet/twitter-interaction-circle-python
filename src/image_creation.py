@@ -148,14 +148,14 @@ def create_image(
 
             angle = math.radians(base_usr_img_angle * user_idx + gap_size)
 
-            # + center of the background image
+            # +center of the background image
             avatar_center_x = math.floor(math.cos(angle) * R + (bg.size[0] / 2))
             avatar_center_y = math.floor(math.sin(angle) * R + (bg.size[1] / 2))
 
             bg.paste(
                 avatar,
                 (
-                    # Image.paste co-ordinates needs top left co-ordinates
+                    # Image.paste needs top left co-ordinates
                     # the avatar being a square, subtracting half of its height and width returns the top left co-ordinates
                     math.floor(avatar_center_x - (usr_img_hw / 2)),
                     math.floor(avatar_center_y - (usr_img_hw / 2)),

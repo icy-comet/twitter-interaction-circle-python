@@ -3,17 +3,18 @@
 
 from enum import IntEnum, auto
 
+
+class Interaction(IntEnum):
+    like = auto()
+    retweet = auto()
+    reply = auto()
+
+
 # {username: {1: int, 2:int, 3:int}, ...}
-InteractionsLedger = dict[str, dict[int, int]]
+InteractionsLedger = dict[str, dict[Interaction, int]]
 # [{username: str, score: float, avatar_url: str}, ...]
 FilteredLedger = list[dict]
 # {username: avatar_url, ...}
 AvatarLedger = dict[str, str]
 # [[layer radius, number of users in the layer, gap size, list of users in the layer], ...]
 LayerConfig = list[list[int | list[dict]]]
-
-
-class Interaction(IntEnum):
-    like = auto()
-    retweet = auto()
-    reply = auto()

@@ -282,7 +282,7 @@ def collect_data(
 
     user = verify_user(screen_name)
     # Twitter API doesn't consider usernames case-sensitive
-    # jahndoe will match to JohnDoe and be verified by the Twitter API
+    # johndoe will match to JohnDoe and be verified by the Twitter API
     screen_name = user.screen_name
 
     center_user = {
