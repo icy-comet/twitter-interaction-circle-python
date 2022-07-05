@@ -1,3 +1,6 @@
+wheel
 Pillow
 python-dotenv
 tweepy
+black
+requests

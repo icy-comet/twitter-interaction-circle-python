@@ -1,37 +1,66 @@
 import json
-from image_creation import create_image
-from data_collection import get_data
+from pathlib import Path
+import src.exceptions as exceptions
+from src.constants import LayerConfig
+from src.data_collection import collect_data
+from src.image_creation import build_layer_config, create_image
 
-# from encoding import encode
-import exceptions
-
-screen_name = "AniketTeredesai"  # twitter username
-
-layers_config = [
-    {"radius": 150, "starting_index": 0, "ending_index": 8},
-    {"radius": 270, "starting_index": 8, "ending_index": 23},
-    {"radius": 380, "starting_index": 23, "ending_index": 60},
-]
-
-background_color = "#2978b5"  # background color of the image produced
-
-pages_to_fetch = 3  # each page consists of 200 tweets and 20 likes
+# from src.encoding import encode_img_to_b64
 
 
-def start(screen_name, pages, color, layers_config):
+class Config:
+    # Twitter username to scan
+    USERNAME = "AniketTeredesai"
+    # hex of the desired background color
+    BG_CLR = "#448dd9"
+    # (height, width)
+    BG_SIZE = (1000, 1000)
+    # layer config constants
+    # [[layer radius, number of users in the layer, gap size], ...]
+    LAYER_CONFIG: LayerConfig = [
+        [0, 1, 0],
+        [200, 8, 25],
+        [330, 15, 25],
+        [450, 26, 20],
+    ]
+    # each page returns maximum of 200 tweets and likes
+    FAVORITES_PAGES_TO_FETCH = 1
+    TIMELINE_PAGES_TO_FETCH = 1
+
+
+def main(debug: bool = False):
+
+    d = Path("circles_dump.json").resolve()
+    i = Path("circles.jpg").resolve()
+    p = Path("placeholder_avatar.png").resolve()
+
     try:
-        user_avatar_url, layers_config, users_in_circles = get_data(
-            screen_name, pages, layers_config
-        )  # unpacking
-        image = create_image(user_avatar_url, color, layers_config)
-        with open(f"{screen_name}_circles.json", "w") as f:
-            json.dump(users_in_circles, f)
-        print("users list saved as json")
-        image.save(f"{screen_name}_interaction_circle.jpg")
-        # base64_image = encode(image)
+        if debug and d.exists():
+            q = Path("debug_avatar.jpg").resolve()
+            with open(d, "r") as f:
+                lc = json.load(f)
+        else:
+            q = None
+            ledger = collect_data(
+                Config.USERNAME,
+                Config.TIMELINE_PAGES_TO_FETCH,
+                Config.FAVORITES_PAGES_TO_FETCH,
+                Config.LAYER_CONFIG,
+            )
+
+            lc = build_layer_config(ledger, Config.LAYER_CONFIG)
+
+            with open(d, "w") as f:
+                json.dump(lc, f)
+
+        image = create_image(Config.BG_SIZE, Config.BG_CLR, lc, p, q)
+        image.save(i, "jpeg")
+        # data_str = encode_img_to_b64(image)
+
     except (exceptions.InactiveUser, exceptions.InvalidUser, exceptions.ApiError) as e:
         print(e)
 
 
 if __name__ == "__main__":
-    start(screen_name, pages_to_fetch, background_color, layers_config)
+    # main(debug=True)
+    main()

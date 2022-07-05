@@ -1,42 +1,48 @@
 ## Introduction
-The script analyzes your recent public activity on Twitter and creates a beautiful image with the avatars of people you most interact with.
+Analyze your Twitter public activity and get to know the people you most interact with.
 
-This is kind of a Python recreation of the popular [Node based project](https://github.com/duiker101/twitter-interaction-circles) that powers [Chirpty](https://chirpty.com).
+The more you interact with someone, the closer they are in your Twitter circle. Visualize this with an image that you can show-off and a detailed JSON list describing the same.
 
-## Example Image
+This is kind of a Python-recreation of the popular [JS-based project](https://github.com/duiker101/twitter-interaction-circles) that powers [Chirpty](https://chirpty.com).
 
-![Example](example.jpg)
+> The user should have atleast one Twitter interaction for this package to work.
 
-## Setup
-### Install Requirements
-Create a virtual environment with:
-```
-python -m venv env
-```
+## Sample Image
 
-And then, simply run:
-```
-pip install -r requirements.txt
-```
+<img src="sample.jpg" width="500" align="center">
 
-> For pinned/tested versions use requirements.pinned.txt.
+## Requirements
+- Create a virtual environment and activate it.
+  ```bash
+  # linux
+  python -m venv venv
+  source ./venv/bin/activate
+  ```
+  ```powershell
+  # windows
+  py -m venv venv
+  .\venv\Scripts\activate
+  ```
+- And then, simply run:
+  ```bash
+  pip install -r requirements.txt
+  ```
+  > For pinned/tested versions use requirements.pinned.txt.
 
-### Loading API keys
-The script looks for the keys in environment variables.
+## Twitter API Authentication
+The package uses OAuth 2.0 App Auth with Twitter API v1.1 and needs a `TWITTER_BEARER_TOKEN` in the system's environment varibales. You can generate one in Twitter's Developer Dashboard.
 
 If using on a local machine, place the keys inside a `.env` file in the project's directory and you should be good to go. Example:
 
+```toml
+TWITTER_BEARER_TOKEN=xxxxxx
 ```
-API_KEY=AAAAAA
-API_SECRET_KEY=BBBB
-```
 
-### Customization
-All the customizable variables can be changed inside `main.py` which serves as the calling point.
+## Customization
+`main.py` file serves as the entry point for the package. All the customizable variables have been listed under the `Config` class inside this file.
 
-The script can also return a JSON list of users in each circle and/or return a base64 encoded image instead of saving it as JPEG. Configure it in `main.py`.
+> Why create this as a package?
+> So that a frontend can be adapted around it. I, myself, host a public web-frontend for this package.
 
-Note: The script, by default, fetches 3 pages of data from the Twitter API. Each page consists of 200 tweets and 20 likes. You can set it to fetch upto 3000 tweets as limited by the API.
-
-### Run
-Running would be as simple as `python main.py`.
+## Debugging
+Pass `debug=True` to the main function inside the `main.py`. That uses dumped online data in subsequent runs instead of calling the API and uses a dummy avatar image instead of downloading the avatars off of the internet.
