@@ -11,6 +11,8 @@ This is kind of a Python-recreation of the popular [JS-based project](https://gi
 
 <img src="sample.jpg" width="500" align="center">
 
+Here's the [JSON dump of this image](sample_dump.json).
+
 ## Requirements
 - Create a virtual environment and activate it.
   ```bash
@@ -34,7 +36,7 @@ The package uses OAuth 2.0 App Auth with Twitter API v1.1 and needs a `TWITTER_B
 
 If using on a local machine, place the keys inside a `.env` file in the project's directory and you should be good to go. Example:
 
-```toml
+```ini
 TWITTER_BEARER_TOKEN=xxxxxx
 ```
 
