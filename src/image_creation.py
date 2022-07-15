@@ -30,17 +30,11 @@ def build_layer_config(data: FilteredLedger, layer_config: LayerConfig) -> Layer
     """
 
     prev_usr_idx = 1
-    for idx in range(len(layer_config)):
-        if idx == 0:
-            layer_config[idx].append(
-                [
-                    data[0],
-                ]
-            )
-        else:
-            curr_usr_idx = prev_usr_idx + layer_config[idx][1]
-            layer_config[idx].append(data[prev_usr_idx:curr_usr_idx])
-            prev_usr_idx = curr_usr_idx
+    layer_config[0].append([data[0]])
+    for idx in range(1, len(layer_config)):
+        curr_usr_idx = prev_usr_idx + layer_config[idx][1]
+        layer_config[idx].append(data[prev_usr_idx:curr_usr_idx])
+        prev_usr_idx = curr_usr_idx
 
     return layer_config
 
