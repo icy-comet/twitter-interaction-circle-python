@@ -9,9 +9,9 @@ This is kind of a Python-recreation of the popular [JS-based project](https://gi
 
 ## Sample Image
 
-<img src="sample.jpg" width="500" align="center">
+<img src="res/sample.jpg" width="500" align="center">
 
-Here's the [JSON dump of this image](sample_dump.json).
+Here's the [JSON dump of this image](res/sample_dump.json).
 
 ## Requirements
 - Create a virtual environment and activate it.

@@ -30,13 +30,13 @@ class Config:
 
 def main(debug: bool = False):
 
-    d = Path("circles_dump.json").resolve()
-    i = Path("circles.jpg").resolve()
-    p = Path("placeholder_avatar.png").resolve()
+    d = Path("res/circles_dump.json").resolve()
+    i = Path("res/circles.jpg").resolve()
+    p = Path("res/placeholder_avatar.png").resolve()
 
     try:
         if debug and d.exists():
-            q = Path("debug_avatar.jpg").resolve()
+            q = Path("res/debug_avatar.jpg").resolve()
             with open(d, "r") as f:
                 lc = json.load(f)
         else:
