@@ -7,11 +7,14 @@ This is kind of a Python-recreation of the popular [JS-based project](https://gi
 
 > The user should have atleast one Twitter interaction for this package to work.
 
-## Sample Image
+## Sample Image Output
 
 <img src="res/sample.jpg" width="500" align="center">
 
-Here's the [JSON dump of this image](res/sample_dump.json).
+Here's the [actual JSON dump of the above image](res/sample_dump.json).
+
+_And attached below is the visual representation of one of the circles:_
+<img src="res/json.png" align="center">
 
 ## Requirements
 - Create a virtual environment and activate it.
